@@ -1,0 +1,3 @@
+[submodule "src/MPU6050"]
+	path = src/MPU6050
+	url = https://github.com/TheEngineRoom-UniGe/MPU6050.git

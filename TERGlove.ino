@@ -1,5 +1,5 @@
 #include <I2Cdev.h>
-#include "MPU6050_9Axis_MotionApps41.h"
+#include "src/MPU6050/MPU6050_9Axis_MotionApps41.h"
 #include "src/EEPROM_Utils/EEPROM_Utils.h"
 #include "src/IMU_Utils/IMU_Utils.h"
 
