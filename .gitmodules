@@ -1,3 +1,11 @@
 [submodule "src/MPU6050"]
 	path = src/MPU6050
 	url = https://github.com/TheEngineRoom-UniGe/MPU6050.git
+
+[submodule "src/IMU_Utils"]
+	path = src/IMU_Utils
+	url = https://github.com/TheEngineRoom-UniGe/IMU_Utils.git
+	
+[submodule "src/EEPROM_Utils"]
+	path = src/EEPROM_Utils
+	url = https://github.com/TheEngineRoom-UniGe/EEPROM_Utils.git
