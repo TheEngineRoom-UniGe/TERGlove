@@ -4,15 +4,20 @@
 #include "src/IMU_Utils/IMU_Utils.h"
 
 s_module *imus_global;
+bool dataFlag = false;
 int numIMU = 0;
 
 uint8_t mux_actual=-1;
 uint8_t channel_actual=-1;
 
+int maxFreqDMP = 200;
+int maxFreqSystem = 500;
+
 udp_data ROS_data;
 
 WiFiClient client;
 BluetoothSerial SerialBT;
+
 
 void setup() {
   Serial.begin(115200);
@@ -51,7 +56,7 @@ void setup() {
   Wire.begin(33,25); // (SDA,SCL) (33,25) and (  27,14)// please check if you use the single multiplexer or two
 
   numIMU = countIMUs();
-  int divider = (((200*numIMU)/300)-1);
+  int divider = (((maxFreqDMP*numIMU)/maxFreqSystem)-1);
   if(numIMU <= 1){
     setDivider(0);
   }else{
@@ -82,7 +87,7 @@ void setup() {
  |  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43  44  45  46  47  |
  * ================================================================================================ */
 
-void loop() {
+void loop(){  
   for (int i = 0;i <numIMU ;i++){
     if(imus_global[i].dmpReady){
       if(imus_global[i].channel!= channel_actual || imus_global[i].mux != mux_actual){
@@ -93,28 +98,18 @@ void loop() {
       }
 
       int res = imus_global[i].sensor.GetCurrentFIFOPacket(imus_global[i].fifoBuffer,imus_global[i].packetSize);
-      
-      if (res ==1){ // Get the Latest packet 
+        
+      if (res == 1){ // Get the Latest packet 
         imus_global[i].sensor.dmpGetQuaternion(&imus_global[i].q, imus_global[i].fifoBuffer);
         imus_global[i].sensor.dmpGetAccel(&imus_global[i].accel,imus_global[i].fifoBuffer);
         imus_global[i].sensor.dmpGetGyro(&imus_global[i].gyro,imus_global[i].fifoBuffer);
         imus_global[i].sensor.dmpGetMag(&imus_global[i].mag, imus_global[i].fifoBuffer);
-   
-        sendData(imus_global[i],ROS_data);
+        imus_global[i].newFlag = 1;
+      }else{
+        imus_global[i].newFlag = 0;
       }
     }
   }
-}
+  sendData(imus_global,ROS_data,numIMU); 
   
-
-///////// It seems the bufer reset is making this problem 
-//minimising the number of buffer resets leads to more chaotic readings 
-// when having more sensors, implies less readings, the buffer is full and more frequently 
-// resetting the buffer when it is full (512), leads to less topic freq. because when we read from the buffer , we are reading the last packet and removing the others
-// making the FIFO clock divider larger MPU6050_DMP_FIFO_RATE_DIVISOR (in _MPU6050_9AXIS_MOTIONAPPS41_H_),  solved partially the problem , 00 is OK for 6 sensors 50 HZ
-// sending 11 topics with dummy data , the topics frequency reached 65-67 HZ, each.
-//MPU6050_DMP_FIFO_RATE_DIVISOR =0x04  , for 11 sensors ==> 20 HZ each
-//MPU6050_DMP_FIFO_RATE_DIVISOR =0x05  , for 11 sensors ==> 25 HZ each
-//MPU6050_DMP_FIFO_RATE_DIVISOR =0x06  , for 11 sensors ==> 29 HZ each
-//MPU6050_DMP_FIFO_RATE_DIVISOR =0x07  , for 11 sensors ==> 25 HZ each
-//These two params needs to be tuned carefully , or to find the way where FIFO can store only one packet  
+}
