@@ -10,3 +10,7 @@ then go to
 Tools ---> Board ---> Boarads manager and look for FireBeetle-ESP32 install the board
 
 Notice other ESP32 libraries exists but will restuls in a final program to big to be uploaded on the board. 
+
+To receive the data and publish them on ROS it is available a ROS driver:
+
+https://github.com/TheEngineRoom-UniGe/TERGlove_ROS_driver
