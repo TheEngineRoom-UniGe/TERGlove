@@ -53,16 +53,19 @@ void setup() {
   setupWiFi(ROS_data);
 
   
-  Wire.begin(33,25); // (SDA,SCL) (33,25) and (  27,14)// please check if you use the single multiplexer or two
+  Wire.begin(27,14); // (SDA,SCL) (33,25) and (  27,14)// please check if you use the single multiplexer or two
 
   numIMU = countIMUs();
   int divider = (((maxFreqDMP*numIMU)/maxFreqSystem)-1);
-  if(numIMU <= 1){
-    setDivider(0);
-  }else{
-    setDivider(divider);
+  
+  if(divider <= 0){
+    divider = 0;
   }
-   
+  
+  Serial.print("Divider: ");
+  Serial.println(divider);
+  setDivider(divider);
+  
   if(numIMU == 0){
     Serial.println("No IMU sensor detected");
   }else{
